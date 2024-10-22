@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ConsoleMenu
 {
-    public class ConsoleMenuCon
+    public class ConsoleMenuControll
     {
         public Menu main;
         public Menu active;
         public string route = "";
         public int x, y;
 
-        public ConsoleMenuCon(Menu main)
+        public ConsoleMenuControll(Menu main)
         {
             this.main = main;
             active = main;
@@ -28,7 +28,7 @@ namespace ConsoleMenu
                 Console.Clear();
                 Console.WriteLine(route);
                 Console.WriteLine($"X:{x} Y:{y}");
-                Show(active.childrens);
+                Show(active.childrens, active.elements);
 
 
                 switch (Console.ReadKey().Key)
@@ -59,7 +59,7 @@ namespace ConsoleMenu
                         break;
                     case ConsoleKey.Enter:
 
-                        if (x == 0)
+                        if (x == 0 && y<active.childrens.Count())
                         {
                             switch (active.childrens[y])
                             {
@@ -75,38 +75,76 @@ namespace ConsoleMenu
                                         route = route.Substring(0, route.LastIndexOf('/'));
                                         (x, y) = (0, 0);
                                     }
+                                    else
+                                    {
+                                        Environment.Exit(0);
+                                    }
                                     break;
                             }
                         }
-                        else
+                        else if (active.elements[x, y] != null)
                         {
                             switch (active.elements[x, y])
                             {
                                 case InputField:
-                                    break;
 
+                                    break;
                             }
                         }
                         break;
-
                 }
-
-
             }
         }
 
 
-        public void Show(List<Element> childrens)
+        public void Show(List<Element> childrens, Element[,] elements)
         {
             for (int i = 0; i < childrens.Count(); i++)
             {
-                if (y == i)
+                if (x == 0 && y == i)
                 {
-                    Console.BackgroundColor = ConsoleColor.White;
-                    Console.ForegroundColor = ConsoleColor.Black;
+                    DrawBox(childrens[i].title, true);
                 }
-                Console.WriteLine(childrens[i].title);
+                else
+                {
+                    DrawBox(childrens[i].title, false);
+                }
+                Console.WriteLine();
+            }
+            for (int y = 0; y < elements.GetLength(1); y++)
+            {
+                for (int x = 0; x < elements.GetLength(0); x++)
+                {
+                    
+                    if (elements[x, y] != null)
+                    {
+                        (int xCursor, int yCursor) = ((x + (10 * x)) + 15, (y + (2 * y)) + 3);
+                        Console.SetCursorPosition(xCursor, yCursor);
+                        Console.Write(elements[x, y].title);
+                    }
+                }
+            }
+            
+        }
+
+        public void DrawBox(string text, bool selected)
+        {
+            if (selected)
+            {
+                Console.Write($"   ╔{new string('═', text.Length)}╗\n");
+                Console.Write($" =>║"); 
+                //Console.BackgroundColor = ConsoleColor.White;
+                Console.ForegroundColor = ConsoleColor.Blue; 
+                Console.Write(text);
                 Console.ResetColor();
+                Console.Write("║\n");
+                Console.Write($"   ╚{new string('═', text.Length)}╝");
+            }
+            else
+            {
+                Console.Write($"   ╔{new string('═', text.Length)}╗\n");
+                Console.Write($" - ║{text}║\n");
+                Console.Write($"   ╚{new string('═', text.Length)}╝");
             }
         }
     }

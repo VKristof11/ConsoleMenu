@@ -10,47 +10,42 @@ namespace ConsoleMenu
     {
         public Menu parent;
         public List<Element> childrens = new List<Element>();
-        public Element[,] elements = new Element[10, 5];
-
-        public Menu(string title) : base(title)
-        {
-            parent = null;
-        }
+        public Element[,] elements = new Element[10, 4];
 
         public Menu(Menu parent, string title) : base(title)
         {
             this.parent = parent;
-            childrens.Add(new Back("Back"));
+            if (parent == null)
+            {
+                childrens.Add(new Back("Exit"));
+            }
+            else
+            {
+                childrens.Add(new Back("Back"));
+            }
         }
 
-        public Menu AddMenu(string title, Action<Menu> test)
+        public Menu AddMenu(string title, Action<Menu> next)
         {
             Menu help = new Menu(this, title);
             childrens.Add(help);
-            if (test != null)
+            if (next != null)
             {
-                test(help);
+                next(help);
             }
             return this;
         }
 
-        public void RemoveMenu(Menu childe)
+        public void RemoveMenu(Menu children)
         {
-            childrens.Remove(childe);
+            childrens.Remove(children);
         }
 
-        public void Show(int y)
+        public Menu AddInput(int row, int col)
         {
-            for (int i = 0; i < childrens.Count(); i++)
-            {
-                if (y == i)
-                {
-                    Console.BackgroundColor = ConsoleColor.White;
-                    Console.ForegroundColor = ConsoleColor.Black;
-                }
-                Console.WriteLine(childrens[i].title);
-                Console.ResetColor();
-            }
+            elements[row, col] = new InputField(null);
+            return this;
         }
+
     }
 }
