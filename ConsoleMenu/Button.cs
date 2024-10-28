@@ -6,12 +6,15 @@ using System.Threading.Tasks;
 
 namespace ConsoleMenu
 {
-    public class Back : Element
+    public class Button : Element
     {
-        public bool isExit;
-        public Back(string title, bool isExit) : base(title)
+        public Action action;
+
+        public Button(string title, Action action) : base(title)
         {
-            this.isExit = isExit;
+            this.action = action;
         }
+
+
     }
 }
