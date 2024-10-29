@@ -8,9 +8,9 @@ namespace ConsoleMenu
 {
     public class Button : Element
     {
-        public Action action;
+        public Action<Menu> action;
 
-        public Button(string title, Action action) : base(title)
+        public Button(string title, Action<Menu> action) : base(title)
         {
             this.action = action;
         }

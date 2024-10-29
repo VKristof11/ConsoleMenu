@@ -3,18 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace ConsoleMenu
 {
     public class ConsoleMenuControll
     {
-        public Menu main;
-        public Menu active;
-        public string route = "";
-        public int x, y;
-        public int xBefore, yBefore;
-        public int longestMenu;
-        public int longestElement;
+        private Menu main;
+        private Menu active;
+        private string route = "";
+        private int x, y;
+        private int xBefore, yBefore;
+        private int longestMenu;
+        private int longestElement;
+
+        private int extraWidth = 100;
+        private int extraHeight = 15;
+        private string eraser = " ";
+
+        private int elementsXOffset = 17;
+
 
         public ConsoleMenuControll(Menu main)
         {
@@ -23,23 +31,14 @@ namespace ConsoleMenu
             (x, y) = (0, 0);
             (xBefore, yBefore) = (0, 0);
         }
-
+        
         public void UseMenu()
         {
-            Console.CursorVisible = false;
-            route += main.title;
-            longestMenu = active.LongestMenu();
-            longestElement = active.LongestElement();
-
-            Console.WriteLine(route);
-            Console.WriteLine();
-            //Console.WriteLine($"X:{x} Y:{y}");
+            Setup();
             ShowFull(active.subMenus, active.elements);
 
             while (true)
             {
-                //Console.SetCursorPosition(0, 1);
-                //Console.Write($"X:{x} Y:{y}");
                 ShowUpdate(active.subMenus, active.elements, xBefore, yBefore);
                 (xBefore, yBefore) = (x, y);
 
@@ -105,10 +104,6 @@ namespace ConsoleMenu
 
                             longestMenu = active.LongestMenu();
                             longestElement = active.LongestElement();
-                            Console.Clear();
-                            Console.WriteLine(route);
-                            Console.WriteLine();
-                            //Console.WriteLine($"X:{x} Y:{y}");
                             ShowFull(active.subMenus, active.elements);
                         }
                         else if ( x == 1 && y < active.elements.Count )
@@ -116,8 +111,9 @@ namespace ConsoleMenu
                             switch (active.elements[y])
                             {
                                 case InputField:
+                                    Console.CursorVisible = true;
                                     Console.ForegroundColor = ConsoleColor.Blue;
-                                    (int xCursor, int yCursor) = (18, (y + (2 * y)) + 3);
+                                    (int xCursor, int yCursor) = (elementsXOffset, (y + (2 * y)) + 3);
                                     Console.SetCursorPosition(xCursor, yCursor);
                                     StringBuilder input;
                                     if (((InputField)active.elements[y]).defaultt)
@@ -158,9 +154,10 @@ namespace ConsoleMenu
                                         ((InputField)active.elements[y]).input = "__________";
                                         ((InputField)active.elements[y]).defaultt = true;
                                     }
+                                    Console.CursorVisible = false;
                                     break;
                                 case Button:
-                                    ((Button)active.elements[y]).action?.Invoke();
+                                    ((Button)active.elements[y]).action(active);
                                     break;
                             }
                         }
@@ -169,7 +166,66 @@ namespace ConsoleMenu
             }
         }
 
-        public void ShowUpdate(List<Element> subMenus, List<Element> elements, int xBefore, int yBefore)
+        private void Setup()
+        {
+            Console.CursorVisible = false;
+            route = main.title;
+            longestMenu = active.LongestMenu();
+            longestElement = active.LongestElement();
+            SetWindowSize();
+            eraser = new string(' ', Console.WindowWidth);
+        }
+
+        private void SetWindowSize()
+        {
+            Console.WindowWidth = longestMenu + longestElement + extraWidth;
+            Console.BufferWidth = longestMenu + longestElement + extraWidth;
+            Console.WindowHeight = Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 2 + extraHeight;
+            Console.BufferHeight = Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 2 + extraHeight;
+        }
+
+        public void WriteOne(string text)
+        {
+            Console.SetCursorPosition(0, Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 3);
+            for (int i = 0; i < extraHeight-2; i++)
+            {
+                Console.WriteLine(eraser);
+            }
+            Console.SetCursorPosition(0, Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 3);
+            Console.Write(text);
+        }
+
+        public void WriteMore(string[] texts)
+        {
+            Console.SetCursorPosition(0, Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 3);
+            for (int i = 0; i < extraHeight - 2; i++)
+            {
+                Console.WriteLine(eraser);
+            }
+
+            for (int i = 0; i < texts.Length; i++)
+            {
+                Console.SetCursorPosition(0, i + Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 3);
+                Console.Write(texts[i]);
+            }
+        }
+
+        public InputField GetInputField(int id)
+        {
+            for (int i = 0; i < active.elements.Count; i++)
+            {
+                if (active.elements[i] is InputField)
+                {
+                    if (((InputField)active.elements[i]).id == id)
+                    {
+                        return (InputField)active.elements[i];
+                    }
+                }
+            }
+            return null;
+        }
+
+        private void ShowUpdate(List<Element> subMenus, List<Element> elements, int xBefore, int yBefore)
         {
             int xCursor, yCursor;
 
@@ -181,16 +237,14 @@ namespace ConsoleMenu
                 DrawMenu(subMenus[yBefore].title, false);
             }
             
-            //int newX = xBefore - 1;
             if (xBefore > 0 && yBefore < elements.Count)
             {
-                //(xCursor, yCursor) = ((newX + (10 * newX)) + 15, (yBefore + (2 * yBefore)) + 3);
-                (xCursor, yCursor) = (18, (yBefore + (2 * yBefore)) + 3);
+                (xCursor, yCursor) = (elementsXOffset, (yBefore + (2 * yBefore)) + 2);
                 Console.SetCursorPosition(xCursor, yCursor);
                 switch (elements[yBefore])
                 {
                     case InputField:
-                        Console.Write(((InputField)elements[yBefore]).input);
+                        DrawInput((InputField)elements[yBefore], false, xCursor, yCursor);
                         break;
                     case Button:
                         DrawButton(elements[yBefore].title, false, xCursor, yCursor);
@@ -210,14 +264,12 @@ namespace ConsoleMenu
             
             if (x > 0 && y < elements.Count)
             {
-                (xCursor, yCursor) = (18, (y + (2 * y)) + 3);
+                (xCursor, yCursor) = (elementsXOffset, (y + (2 * y)) + 2);
                 Console.SetCursorPosition(xCursor, yCursor);
                 switch (elements[y])
                 {
                     case InputField:
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.Write(((InputField)elements[y]).input);
-                        Console.ResetColor();
+                        DrawInput((InputField)elements[y], true, xCursor, yCursor);
                         break;
                     case Button:
                         DrawButton(elements[y].title, true, xCursor, yCursor);
@@ -227,25 +279,34 @@ namespace ConsoleMenu
             // --------------------
         }
 
-        public void ShowFull(List<Element> childrens, List<Element> elements)
+        private void ShowFull(List<Element> subMenus, List<Element> elements)
         {
-            for (int i = 0; i < childrens.Count(); i++)
+            Console.Clear();
+            SetWindowSize();
+            Console.WriteLine(route);
+
+            Console.SetCursorPosition(0, 1);
+            Console.Write($"{new string('─', longestMenu + 8)}┬{new string('─', Console.WindowWidth - (longestMenu + 8)-1)}");
+            for (int i = 2; i < Math.Max(subMenus.Count, elements.Count) * 3 + 2; i++)
+            {
+                Console.SetCursorPosition(longestMenu + 8, i);
+                Console.Write('│');
+            }
+            Console.SetCursorPosition(0, Math.Max(subMenus.Count, elements.Count) * 3 + 2);
+            Console.Write($"{new string('─', longestMenu + 8)}┴{new string('─', Console.WindowWidth - (longestMenu + 8)-1)}");
+
+            Console.SetCursorPosition(0, 2);
+            for (int i = 0; i < subMenus.Count(); i++)
             {
                 if (x == 0 && y == i)
                 {
-                    DrawMenu(childrens[i].title, true);
+                    DrawMenu(subMenus[i].title, true);
                 }
                 else
                 {
-                    DrawMenu(childrens[i].title, false);
+                    DrawMenu(subMenus[i].title, false);
                 }
                 Console.WriteLine();
-            }
-
-            for (int i = 0; i < Console.WindowHeight-1; i++)
-            {
-                Console.SetCursorPosition(15, i+1);
-                Console.Write('|');
             }
 
             for (int i = 0; i < elements.Count; i++)
@@ -254,14 +315,12 @@ namespace ConsoleMenu
                 {
                     if (x == 1 && y == i)
                     {
-                        //Console.ForegroundColor = ConsoleColor.Blue;
-                        //(int xCursor, int yCursor) = ((x + (10 * x)) + 15, (i + (2 * i)) + 3);
-                        (int xCursor, int yCursor) = (18, (i + (2 * i)) + 3);
+                        (int xCursor, int yCursor) = (elementsXOffset, (i + (2 * i)) + 2);
                         Console.SetCursorPosition(xCursor, yCursor);
                         switch (elements[i])
                         {
                             case InputField:
-                                Console.Write(((InputField)elements[i]).input);
+                                DrawInput((InputField)elements[i], true, xCursor, yCursor);
                                 break;
                             case Button:
                                 DrawButton(elements[i].title, true, xCursor, yCursor);
@@ -270,12 +329,12 @@ namespace ConsoleMenu
                     }
                     else
                     {
-                        (int xCursor, int yCursor) = (18, (i + (2 * i)) + 3);
+                        (int xCursor, int yCursor) = (elementsXOffset, (i + (2 * i)) + 2);
                         Console.SetCursorPosition(xCursor, yCursor);
                         switch (elements[i])
                         {
                             case InputField:
-                                Console.Write(((InputField)elements[i]).input);
+                                DrawInput((InputField)elements[i], false, xCursor, yCursor);
                                 break;
                             case Button:
                                 DrawButton(elements[i].title, false, xCursor, yCursor);
@@ -286,13 +345,12 @@ namespace ConsoleMenu
             }
         }
 
-        public void DrawMenu(string text, bool selected)
+        private void DrawMenu(string text, bool selected)
         {
             if (selected)
             {
                 Console.Write($"   ╔{new string('═', longestMenu + 2)}╗\n");
                 Console.Write($" =>║ {new string(' ', (longestMenu - text.Length) / 2)}");
-                //Console.BackgroundColor = ConsoleColor.White;
                 Console.ForegroundColor = ConsoleColor.Blue; 
                 Console.Write(text);
                 Console.ResetColor();               
@@ -320,16 +378,7 @@ namespace ConsoleMenu
                     }
                 }
                 */
-                Console.Write($"{new string(' ', 
-                    longestMenu % 2 == 0 ? 
-                    text.Length % 2 == 0 ? 
-                      (longestMenu - text.Length) / 2 
-                    : ((longestMenu - text.Length) / 2) + 1 
-                    :text.Length % 2 == 0 ?
-                      ((longestMenu - text.Length) / 2) + 1
-                    : (longestMenu - text.Length) / 2
-                    )} ║\n");
-                
+                Console.Write($"{new string(' ', longestMenu % 2 == 0 ? text.Length % 2 == 0 ? (longestMenu - text.Length) / 2 : ((longestMenu - text.Length) / 2) + 1 :text.Length % 2 == 0 ? ((longestMenu - text.Length) / 2) + 1 : (longestMenu - text.Length) / 2)} ║\n");
                 Console.Write($"   ╚{new string('═', longestMenu + 2)}╝");
             }
             else
@@ -340,7 +389,7 @@ namespace ConsoleMenu
             }
         }
 
-        public void DrawButton(string text, bool selected, int xCursor, int yCursor)
+        private void DrawButton(string text, bool selected, int xCursor, int yCursor)
         {
             if (selected)
             {
@@ -348,7 +397,6 @@ namespace ConsoleMenu
                 Console.Write($"╔{new string('═', longestElement + 2)}╗\n");
                 Console.SetCursorPosition(xCursor, yCursor+1);
                 Console.Write($"║ {new string(' ', (longestElement - text.Length) / 2)}");
-                //Console.BackgroundColor = ConsoleColor.White;
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write(text);
                 Console.ResetColor();
@@ -395,6 +443,26 @@ namespace ConsoleMenu
                 Console.Write($"║ {new string(' ', (longestElement - text.Length) / 2)}{text}{new string(' ', longestElement % 2 == 0 ? text.Length % 2 == 0 ? (longestElement - text.Length) / 2 : ((longestElement - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((longestElement - text.Length) / 2) + 1 : (longestElement - text.Length) / 2)} ║\n");
                 Console.SetCursorPosition(xCursor, yCursor + 2);
                 Console.Write($"╚{new string('═', longestElement + 2)}╝");
+            }
+        }
+
+        private void DrawInput(InputField input, bool selected, int xCursor, int yCursor)
+        {
+            if (selected)
+            {
+                Console.SetCursorPosition(xCursor, yCursor);
+                Console.Write($"{input.title}:");
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.SetCursorPosition(xCursor, yCursor + 1);
+                Console.Write($"{input.input}");
+                Console.ResetColor();
+            }
+            else
+            {
+                Console.SetCursorPosition(xCursor, yCursor);
+                Console.Write($"{input.title}:");
+                Console.SetCursorPosition(xCursor, yCursor + 1);
+                Console.Write($"{input.input}");
             }
         }
     }

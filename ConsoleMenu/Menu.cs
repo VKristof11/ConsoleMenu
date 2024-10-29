@@ -89,7 +89,7 @@ namespace ConsoleMenu
             return this;
         }
 
-        public Menu AddButton(string title, Action action)
+        public Menu AddButton(string title, Action<Menu> action)
         {
             elements.Add(new Button(title, action));
             return this;
