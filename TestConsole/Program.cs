@@ -1,4 +1,5 @@
 ﻿using ConsoleMenu;
+using System.Text;
 
 namespace TestConsole
 {
@@ -18,7 +19,17 @@ namespace TestConsole
             Console.WriteLine(DrawBox("Input"));
 
             Console.ReadKey();
+
+
+            Console.WriteLine("Nyomd meg az Enter-t a szerkesztési módba lépéshez...");
+
+            // Input mező hívása
+            string inputText = GetCustomInput();
+            Console.WriteLine($"A beírt szöveg: {inputText}");
+            Console.WriteLine("TEST VÉGE");
+            Console.ReadKey();
             */
+
 
 
 
@@ -28,23 +39,25 @@ namespace TestConsole
             main.AddMenu("Login", (menu) =>
             {
                 menu.AddMenu("Test", null)
-                .AddInput(0, 0);
+                .AddInput("Title", 0);
             })
-            .AddInput(0,0)
-            .AddInput(1,0)
-            .AddInput(2,0)
-            .AddInput(0,1)
-            .AddInput(1,1)
-            .AddInput(2,1)
             .AddMenu("Option", null)
             .AddMenu("Test3", (menu) =>
             {
-                menu.AddMenu("Test1", null);
-                menu.AddMenu("Test2", null);
+                menu.AddMenu("Test1", null)
+                .AddMenu("Test2", null);
+            })
+            .AddInput("Title", 0)
+            .AddInput("Title", 1)
+            .AddButton("Button", () => {
+                // Mit csinál a gomb
             });
 
             cmc.UseMenu();
         }
+
+
+
 
 
         static string DrawBox(string text)
@@ -54,5 +67,47 @@ namespace TestConsole
                    $"└{new string('─', text.Length)}┘";
         }
 
+        static string GetCustomInput()
+        {
+            StringBuilder input = new StringBuilder();
+            bool isEditing = false;
+
+            while (true)
+            {
+                var key = Console.ReadKey(intercept: true);
+
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    if (isEditing)
+                    {
+                        // Kilépés a szerkesztési módból
+                        Console.WriteLine();
+                        break;
+                    }
+                    else
+                    {
+                        // Belépés a szerkesztési módba
+                        isEditing = true;
+                        Console.Write("\nSzerkesztés: ");
+                    }
+                }
+                else if (isEditing)
+                {
+                    // Szerkesztés mód - karakter hozzáadása vagy törlése
+                    if (key.Key == ConsoleKey.Backspace && input.Length > 0)
+                    {
+                        input.Remove(input.Length - 1, 1);
+                        Console.Write("\b \b"); // Backspace megjelenítése a konzolon
+                    }
+                    else if (key.Key != ConsoleKey.Backspace)
+                    {
+                        input.Append(key.KeyChar);
+                        Console.Write(key.KeyChar); // Karakter megjelenítése a konzolon
+                    }
+                }
+            }
+
+            return input.ToString();
+        }
     }
 }
