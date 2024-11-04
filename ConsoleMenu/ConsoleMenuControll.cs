@@ -29,8 +29,9 @@ namespace ConsoleMenu
             this.main = main;
             active = main;
             (x, y) = (0, 0);
+            (xBefore, yBefore) = (0, 0);
         }
-        
+
         public void UseMenu()
         {
             Setup();
@@ -41,10 +42,10 @@ namespace ConsoleMenu
                 ShowUpdate(active.subMenus, active.elements, xBefore, yBefore);
                 (xBefore, yBefore) = (x, y);
 
-                switch (Console.ReadKey().Key)
+                switch (Console.ReadKey(true).Key)
                 {
                     case ConsoleKey.LeftArrow:
-                        if (x > 0)
+                        if (x > 0 && y < active.subMenus.Count)
                         {
                             x--;
                         }
@@ -56,30 +57,39 @@ namespace ConsoleMenu
                         }
                         break;
                     case ConsoleKey.RightArrow:
-                        if (x < (active.elements.GetLength(1) - 1))
+                        if (x < 1 && y < active.elements.Count)
                         {
                             x++;
                         }
                         break;
                     case ConsoleKey.DownArrow:
-                        if (y < (active.elements.GetLength(0) - 1))
+                        if (x == 0)
                         {
-                            y++;
+                            if (y < active.subMenus.Count - 1)
+                            {
+                                y++;
+                            }
+                        }
+                        else if (x == 1)
+                        {
+                            if (y < active.elements.Count - 1)
+                            {
+                                y++;
+                            }
                         }
                         break;
                     case ConsoleKey.Enter:
-
-                        if (x == 0 && y<active.childrens.Count())
+                        if (x == 0 && y < active.subMenus.Count())
                         {
-                            switch (active.childrens[y])
+                            switch (active.subMenus[y])
                             {
                                 case Menu:
-                                    active = (Menu)active.childrens[y];
+                                    active = (Menu)active.subMenus[y];
                                     route += $"/{active.title}";
                                     (x, y) = (0, 0);
                                     break;
                                 case Back:
-                                    if (active.parent != null)
+                                    if (!((Back)active.subMenus[y]).isExit)
                                     {
                                         active = active.parent;
                                         route = route.Substring(0, route.LastIndexOf('/'));
@@ -96,9 +106,9 @@ namespace ConsoleMenu
                             longestElement = active.LongestElement();
                             ShowFull(active.subMenus, active.elements);
                         }
-                        else if ( x == 1 && y < active.elements.Count )
+                        else if (x == 1 && y < active.elements.Count)
                         {
-                            switch (active.elements[x, y])
+                            switch (active.elements[y])
                             {
                                 case InputField:
                                     Console.CursorVisible = true;
@@ -135,7 +145,7 @@ namespace ConsoleMenu
                                         }
                                     } while (key.Key != ConsoleKey.Enter);
                                     Console.ResetColor();
-                                    if (input.ToString().Length>0)
+                                    if (input.ToString().Length > 0)
                                     {
                                         ((InputField)active.elements[y]).input = input.ToString();
                                     }
@@ -177,7 +187,7 @@ namespace ConsoleMenu
         public void WriteOne(string text)
         {
             Console.SetCursorPosition(0, Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 3);
-            for (int i = 0; i < extraHeight-2; i++)
+            for (int i = 0; i < extraHeight - 2; i++)
             {
                 Console.WriteLine(eraser);
             }
@@ -345,9 +355,9 @@ namespace ConsoleMenu
             {
                 Console.Write($"   ╔{new string('═', longestMenu + 2)}╗\n");
                 Console.Write($" =>║ {new string(' ', (longestMenu - text.Length) / 2)}");
-                Console.ForegroundColor = ConsoleColor.Blue; 
+                Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write(text);
-                Console.ResetColor();               
+                Console.ResetColor();
                 /*
                 if (longestWord % 2 == 0)
                 {
@@ -372,7 +382,7 @@ namespace ConsoleMenu
                     }
                 }
                 */
-                Console.Write($"{new string(' ', longestMenu % 2 == 0 ? text.Length % 2 == 0 ? (longestMenu - text.Length) / 2 : ((longestMenu - text.Length) / 2) + 1 :text.Length % 2 == 0 ? ((longestMenu - text.Length) / 2) + 1 : (longestMenu - text.Length) / 2)} ║\n");
+                Console.Write($"{new string(' ', longestMenu % 2 == 0 ? text.Length % 2 == 0 ? (longestMenu - text.Length) / 2 : ((longestMenu - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((longestMenu - text.Length) / 2) + 1 : (longestMenu - text.Length) / 2)} ║\n");
                 Console.Write($"   ╚{new string('═', longestMenu + 2)}╝");
             }
             else
@@ -389,7 +399,7 @@ namespace ConsoleMenu
             {
                 Console.SetCursorPosition(xCursor, yCursor);
                 Console.Write($"╔{new string('═', longestElement + 2)}╗\n");
-                Console.SetCursorPosition(xCursor, yCursor+1);
+                Console.SetCursorPosition(xCursor, yCursor + 1);
                 Console.Write($"║ {new string(' ', (longestElement - text.Length) / 2)}");
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write(text);
@@ -427,7 +437,7 @@ namespace ConsoleMenu
                       ((longestElement - text.Length) / 2) + 1
                     : (longestElement - text.Length) / 2
                     )} ║\n");
-                Console.SetCursorPosition(xCursor, yCursor+2);
+                Console.SetCursorPosition(xCursor, yCursor + 2);
                 Console.Write($"╚{new string('═', longestElement + 2)}╝");
             }
             else
