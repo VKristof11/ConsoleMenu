@@ -225,75 +225,25 @@ namespace ConsoleMenu
             return null;
         }
 
-        private void ShowUpdate(List<Element> subMenus, List<Element> elements, int xBefore, int yBefore)
-        {
-            int xCursor, yCursor;
-
-            // ----- Befor reset -----
-            if (xBefore == 0 && yBefore < subMenus.Count)
-            {
-                (xCursor, yCursor) = (0, yBefore + 2 + (yBefore * 2));
-                Console.SetCursorPosition(xCursor, yCursor);
-                DrawMenu(subMenus[yBefore].title, false);
-            }
-            
-            if (xBefore > 0 && yBefore < elements.Count)
-            {
-                (xCursor, yCursor) = (elementsXOffset, (yBefore + (2 * yBefore)) + 2);
-                Console.SetCursorPosition(xCursor, yCursor);
-                switch (elements[yBefore])
-                {
-                    case InputField:
-                        DrawInput((InputField)elements[yBefore], false, xCursor, yCursor);
-                        break;
-                    case Button:
-                        DrawButton(elements[yBefore].title, false, xCursor, yCursor);
-                        break;
-                }
-            }
-            // --------------------
-
-
-            // ----- Next update -----
-            if (x == 0 && y < subMenus.Count)
-            {
-                (xCursor, yCursor) = (0, y + 2 + (y * 2));
-                Console.SetCursorPosition(xCursor, yCursor);
-                DrawMenu(subMenus[y].title, true);
-            }
-            
-            if (x > 0 && y < elements.Count)
-            {
-                (xCursor, yCursor) = (elementsXOffset, (y + (2 * y)) + 2);
-                Console.SetCursorPosition(xCursor, yCursor);
-                switch (elements[y])
-                {
-                    case InputField:
-                        DrawInput((InputField)elements[y], true, xCursor, yCursor);
-                        break;
-                    case Button:
-                        DrawButton(elements[y].title, true, xCursor, yCursor);
-                        break;
-                }
-            }
-            // --------------------
-        }
-
         private void ShowFull(List<Element> subMenus, List<Element> elements)
         {
             Console.Clear();
             SetWindowSize();
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine(route);
+            Console.ResetColor();
 
             Console.SetCursorPosition(0, 1);
-            Console.Write($"{new string('─', longestMenu + 8)}┬{new string('─', Console.WindowWidth - (longestMenu + 8)-1)}");
-            for (int i = 2; i < Math.Max(subMenus.Count, elements.Count) * 3 + 2; i++)
+            Console.Write($"{new string('─', longestMenu + 8)}┬{new string('─', longestElement + 8)}┬{new string('─', Console.WindowWidth - (longestMenu + 8 + longestElement + 8) - 1)}");
+            for (int i = 2; i < Console.WindowHeight; i++) //Math.Max(subMenus.Count, elements.Count)* 3 + 2
             {
                 Console.SetCursorPosition(longestMenu + 8, i);
                 Console.Write('│');
+                Console.SetCursorPosition(longestMenu + longestElement + 17, i);
+                Console.Write('│');
             }
-            Console.SetCursorPosition(0, Math.Max(subMenus.Count, elements.Count) * 3 + 2);
-            Console.Write($"{new string('─', longestMenu + 8)}┴{new string('─', Console.WindowWidth - (longestMenu + 8)-1)}");
+            //Console.SetCursorPosition(0, Math.Max(subMenus.Count, elements.Count) * 3 + 2);
+            //Console.Write($"{new string('─', longestMenu + 8)}┴{new string('─', Console.WindowWidth - (longestMenu + 8)-1)}");
 
             Console.SetCursorPosition(0, 2);
             for (int i = 0; i < subMenus.Count(); i++)
@@ -343,6 +293,60 @@ namespace ConsoleMenu
                     }
                 }
             }
+        }
+
+        private void ShowUpdate(List<Element> subMenus, List<Element> elements, int xBefore, int yBefore)
+        {
+            int xCursor, yCursor;
+
+            // ----- Befor reset -----
+            if (xBefore == 0 && yBefore < subMenus.Count)
+            {
+                (xCursor, yCursor) = (0, yBefore + 2 + (yBefore * 2));
+                Console.SetCursorPosition(xCursor, yCursor);
+                DrawMenu(subMenus[yBefore].title, false);
+            }
+
+            if (xBefore > 0 && yBefore < elements.Count)
+            {
+                (xCursor, yCursor) = (elementsXOffset, (yBefore + (2 * yBefore)) + 2);
+                Console.SetCursorPosition(xCursor, yCursor);
+                switch (elements[yBefore])
+                {
+                    case InputField:
+                        DrawInput((InputField)elements[yBefore], false, xCursor, yCursor);
+                        break;
+                    case Button:
+                        DrawButton(elements[yBefore].title, false, xCursor, yCursor);
+                        break;
+                }
+            }
+            // --------------------
+
+
+            // ----- Next update -----
+            if (x == 0 && y < subMenus.Count)
+            {
+                (xCursor, yCursor) = (0, y + 2 + (y * 2));
+                Console.SetCursorPosition(xCursor, yCursor);
+                DrawMenu(subMenus[y].title, true);
+            }
+
+            if (x > 0 && y < elements.Count)
+            {
+                (xCursor, yCursor) = (elementsXOffset, (y + (2 * y)) + 2);
+                Console.SetCursorPosition(xCursor, yCursor);
+                switch (elements[y])
+                {
+                    case InputField:
+                        DrawInput((InputField)elements[y], true, xCursor, yCursor);
+                        break;
+                    case Button:
+                        DrawButton(elements[y].title, true, xCursor, yCursor);
+                        break;
+                }
+            }
+            // --------------------
         }
 
         private void DrawMenu(string text, bool selected)
