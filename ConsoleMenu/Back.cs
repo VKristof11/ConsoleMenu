@@ -8,10 +8,8 @@ namespace ConsoleMenu
 {
     public class Back : Element
     {
-        public bool isExit;
-        public Back(string title, bool isExit) : base(title)
+        public Back(string title) : base(title)
         {
-            this.isExit = isExit;
         }
     }
 }

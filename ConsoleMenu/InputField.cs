@@ -9,17 +9,13 @@ namespace ConsoleMenu
     public class InputField : Element
     {
         Menu parent;
-        public int id; 
         public string input;
-        public bool defaultt;
 
-        public InputField(string title, int id ) : base(title)
+        public InputField(string title) : base(title)
         {
-            input = "__________";
-            this.id = id;
-            defaultt = true;
+            this.title = "________";
+            input = string.Empty;
         }
-
 
 
     }

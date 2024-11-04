@@ -9,68 +9,26 @@ namespace ConsoleMenu
     public class Menu : Element
     {
         public Menu parent;
-        public List<Element> subMenus = new List<Element>(10);
-        public List<Element> elements = new List<Element>();
+        public List<Element> childrens = new List<Element>();
+        public Element[,] elements = new Element[10, 4];
 
         public Menu(Menu parent, string title) : base(title)
         {
             this.parent = parent;
             if (parent == null)
             {
-                subMenus.Add(new Back("Exit", true));
+                childrens.Add(new Back("Exit"));
             }
             else
             {
-                subMenus.Add(new Back("Back", false));
+                childrens.Add(new Back("Back"));
             }
-        }
-
-        public int LongestMenu()
-        {
-            int max = subMenus[0].title.Length;
-            for (int i = 1; i < subMenus.Count; i++)
-            {
-                if (subMenus[i].title.Length > max)
-                {
-                    max = subMenus[i].title.Length;
-                }
-            }
-            return max;
-        }
-
-        public int LongestElement()
-        {
-            int max = 0;
-            if (elements.Count > 0)
-            {
-                max = elements[0].title.Length;
-                for (int i = 1; i < elements.Count; i++)
-                {
-                    switch (elements[i])
-                    {
-                        case InputField:
-                            if (((InputField)elements[i]).input.Length > max)
-                            {
-                                max = ((InputField)elements[i]).input.Length;
-                            }
-                            break;
-                        case Button:
-                            if (elements[i].title.Length > max)
-                            {
-                                max = elements[i].title.Length;
-                            }
-                            break;
-                    }
-
-                }
-            }
-            return max;
         }
 
         public Menu AddMenu(string title, Action<Menu> next)
         {
             Menu help = new Menu(this, title);
-            subMenus.Add(help);
+            childrens.Add(help);
             if (next != null)
             {
                 next(help);
@@ -80,11 +38,12 @@ namespace ConsoleMenu
 
         public void RemoveMenu(Menu children)
         {
-            subMenus.Remove(children);
+            childrens.Remove(children);
         }
 
-        public Menu AddInput(string title, int id)
+        public Menu AddInput(int row, int col)
         {
+<<<<<<< HEAD
             elements.Add(new InputField(title, id));
             return this;
         }
@@ -92,6 +51,9 @@ namespace ConsoleMenu
         public Menu AddButton(string title, Action<Menu> action)
         {
             elements.Add(new Button(title, action));
+=======
+            elements[row, col] = new InputField(null);
+>>>>>>> cc0ad8dc019ca68fef9b328dc186ab20c630cd8d
             return this;
         }
 

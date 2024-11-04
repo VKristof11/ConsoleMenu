@@ -29,7 +29,6 @@ namespace ConsoleMenu
             this.main = main;
             active = main;
             (x, y) = (0, 0);
-            (xBefore, yBefore) = (0, 0);
         }
         
         public void UseMenu()
@@ -42,10 +41,10 @@ namespace ConsoleMenu
                 ShowUpdate(active.subMenus, active.elements, xBefore, yBefore);
                 (xBefore, yBefore) = (x, y);
 
-                switch (Console.ReadKey(true).Key)
+                switch (Console.ReadKey().Key)
                 {
                     case ConsoleKey.LeftArrow:
-                        if (x > 0 && y < active.subMenus.Count)
+                        if (x > 0)
                         {
                             x--;
                         }
@@ -57,39 +56,30 @@ namespace ConsoleMenu
                         }
                         break;
                     case ConsoleKey.RightArrow:
-                        if (x < 1 && y < active.elements.Count)
+                        if (x < (active.elements.GetLength(1) - 1))
                         {
                             x++;
                         }
                         break;
                     case ConsoleKey.DownArrow:
-                        if (x == 0)
+                        if (y < (active.elements.GetLength(0) - 1))
                         {
-                            if (y < active.subMenus.Count - 1)
-                            {
-                                y++;
-                            }
-                        }
-                        else if (x == 1)
-                        {
-                            if (y < active.elements.Count - 1)
-                            {
-                                y++;
-                            }
+                            y++;
                         }
                         break;
                     case ConsoleKey.Enter:
-                        if (x == 0 && y < active.subMenus.Count())
+
+                        if (x == 0 && y<active.childrens.Count())
                         {
-                            switch (active.subMenus[y])
+                            switch (active.childrens[y])
                             {
                                 case Menu:
-                                    active = (Menu)active.subMenus[y];
+                                    active = (Menu)active.childrens[y];
                                     route += $"/{active.title}";
                                     (x, y) = (0, 0);
                                     break;
                                 case Back:
-                                    if (!((Back)active.subMenus[y]).isExit)
+                                    if (active.parent != null)
                                     {
                                         active = active.parent;
                                         route = route.Substring(0, route.LastIndexOf('/'));
@@ -108,7 +98,7 @@ namespace ConsoleMenu
                         }
                         else if ( x == 1 && y < active.elements.Count )
                         {
-                            switch (active.elements[y])
+                            switch (active.elements[x, y])
                             {
                                 case InputField:
                                     Console.CursorVisible = true;
