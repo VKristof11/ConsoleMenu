@@ -43,7 +43,7 @@ namespace ConsoleMenu
             int max = 0;
             if (elements.Count > 0)
             {
-                max = elements[0].title.Length;
+                max = elements[0].title.Length + 2;
                 for (int i = 1; i < elements.Count; i++)
                 {
                     switch (elements[i])
@@ -51,13 +51,13 @@ namespace ConsoleMenu
                         case InputField:
                             if (((InputField)elements[i]).input.Length > max)
                             {
-                                max = ((InputField)elements[i]).input.Length;
+                                max = ((InputField)elements[i]).input.Length + 2;
                             }
                             break;
                         case Button:
                             if (elements[i].title.Length > max)
                             {
-                                max = elements[i].title.Length;
+                                max = elements[i].title.Length+2; ;
                             }
                             break;
                     }

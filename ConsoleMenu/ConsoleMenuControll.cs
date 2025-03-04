@@ -23,7 +23,6 @@ namespace ConsoleMenu
 
         private int elementsXOffset = 17;
 
-
         public ConsoleMenuControll(Menu main)
         {
             this.main = main;
@@ -104,6 +103,7 @@ namespace ConsoleMenu
 
                             longestMenu = active.LongestMenu();
                             longestElement = active.LongestElement();
+                            elementsXOffset = 10 + longestMenu;
                             ShowFull(active.subMenus, active.elements);
                         }
                         else if (x == 1 && y < active.elements.Count)
@@ -172,6 +172,7 @@ namespace ConsoleMenu
             route = main.title;
             longestMenu = active.LongestMenu();
             longestElement = active.LongestElement();
+            elementsXOffset = 10 + longestMenu;
             SetWindowSize();
             eraser = new string(' ', Console.WindowWidth);
         }
@@ -234,12 +235,12 @@ namespace ConsoleMenu
             Console.ResetColor();
 
             Console.SetCursorPosition(0, 1);
-            Console.Write($"{new string('─', longestMenu + 8)}┬{new string('─', longestElement + 8)}┬{new string('─', Console.WindowWidth - (longestMenu + 8 + longestElement + 8) - 1)}");
+            Console.Write($"{new string('─', longestMenu + 8)}┬{new string('─', longestElement + 6)}┬{new string('─', Console.WindowWidth - (longestMenu + 8 + longestElement + 8) - 1)}");
             for (int i = 2; i < Console.WindowHeight; i++) //Math.Max(subMenus.Count, elements.Count)* 3 + 2
             {
                 Console.SetCursorPosition(longestMenu + 8, i);
                 Console.Write('│');
-                Console.SetCursorPosition(longestMenu + longestElement + 17, i);
+                Console.SetCursorPosition(longestMenu + longestElement + 15, i);
                 Console.Write('│');
             }
             //Console.SetCursorPosition(0, Math.Max(subMenus.Count, elements.Count) * 3 + 2);
@@ -358,30 +359,6 @@ namespace ConsoleMenu
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write(text);
                 Console.ResetColor();
-                /*
-                if (longestWord % 2 == 0)
-                {
-                    if (text.Length % 2 == 0)
-                    {
-                        Console.Write($"{new string(' ', (longestWord - text.Length) / 2)} ║\n");
-                    }
-                    else
-                    {
-                        Console.Write($"{new string(' ', ((longestWord - text.Length) / 2) + 1)} ║\n");
-                    }
-                }
-                else
-                {
-                    if (text.Length % 2 == 0)
-                    {
-                        Console.Write($"{new string(' ', ((longestWord - text.Length) / 2) + 1)} ║\n");
-                    }
-                    else
-                    {
-                        Console.Write($"{new string(' ', (longestWord - text.Length) / 2)} ║\n");
-                    }
-                }
-                */
                 Console.Write($"{new string(' ', longestMenu % 2 == 0 ? text.Length % 2 == 0 ? (longestMenu - text.Length) / 2 : ((longestMenu - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((longestMenu - text.Length) / 2) + 1 : (longestMenu - text.Length) / 2)} ║\n");
                 Console.Write($"   ╚{new string('═', longestMenu + 2)}╝");
             }
@@ -404,30 +381,6 @@ namespace ConsoleMenu
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write(text);
                 Console.ResetColor();
-                /*
-                if (longestWord % 2 == 0)
-                {
-                    if (text.Length % 2 == 0)
-                    {
-                        Console.Write($"{new string(' ', (longestWord - text.Length) / 2)} ║\n");
-                    }
-                    else
-                    {
-                        Console.Write($"{new string(' ', ((longestWord - text.Length) / 2) + 1)} ║\n");
-                    }
-                }
-                else
-                {
-                    if (text.Length % 2 == 0)
-                    {
-                        Console.Write($"{new string(' ', ((longestWord - text.Length) / 2) + 1)} ║\n");
-                    }
-                    else
-                    {
-                        Console.Write($"{new string(' ', (longestWord - text.Length) / 2)} ║\n");
-                    }
-                }
-                */
                 Console.Write($"{new string(' ',
                     longestElement % 2 == 0 ?
                     text.Length % 2 == 0 ?
@@ -470,4 +423,3 @@ namespace ConsoleMenu
             }
         }
     }
-}
