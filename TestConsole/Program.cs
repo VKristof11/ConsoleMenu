@@ -7,7 +7,6 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-
             Menu main = new Menu(null, "Main");
             ConsoleMenuControll cmc = new ConsoleMenuControll(main);
 
