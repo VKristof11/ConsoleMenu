@@ -14,8 +14,9 @@ namespace ConsoleMenu
         private string route = "";
         private int x, y;
         private int xBefore, yBefore;
-        private int longestMenu;
-        private int longestElement;
+
+        private int maxMenuWidth;
+        private int maxElementWidth;
 
         private int extraWidth = 100;
         private int extraHeight = 15;
@@ -29,6 +30,29 @@ namespace ConsoleMenu
             active = main;
             (x, y) = (0, 0);
             (xBefore, yBefore) = (0, 0);
+        }
+
+        private void Setup()
+        {
+            SetWindowSize();
+            
+            Console.CursorVisible = false;
+            route = main.title;
+            
+            active.CaclSize();
+            maxMenuWidth = active.maxMenuWidth;
+            maxElementWidth = active.maxElementWidth;
+
+            elementsXOffset = 10 + maxMenuWidth;
+            eraser = new string(' ', Console.WindowWidth); // !!!!
+        }
+
+        private void SetWindowSize()
+        {
+            Console.WindowWidth = maxMenuWidth + maxElementWidth + extraWidth;
+            Console.BufferWidth = maxMenuWidth + maxElementWidth + extraWidth;
+            Console.WindowHeight = Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 2 + extraHeight;
+            Console.BufferHeight = Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 2 + extraHeight;
         }
 
         public void UseMenu()
@@ -101,9 +125,11 @@ namespace ConsoleMenu
                                     break;
                             }
 
-                            longestMenu = active.LongestMenu();
-                            longestElement = active.LongestElement();
-                            elementsXOffset = 10 + longestMenu;
+                            active.CaclSize();
+                            maxMenuWidth = active.maxMenuWidth;
+                            maxElementWidth = active.maxElementWidth;
+
+                            elementsXOffset = 10 + maxMenuWidth;
                             ShowFull(active.subMenus, active.elements);
                         }
                         else if (x == 1 && y < active.elements.Count)
@@ -151,7 +177,7 @@ namespace ConsoleMenu
                                     }
                                     else
                                     {
-                                        ((InputField)active.elements[y]).input = "__________";
+                                        ((InputField)active.elements[y]).input = new string('_', ((InputField)active.elements[y]).maxSize);
                                         ((InputField)active.elements[y]).defaultt = true;
                                     }
                                     Console.CursorVisible = false;
@@ -166,24 +192,9 @@ namespace ConsoleMenu
             }
         }
 
-        private void Setup()
-        {
-            Console.CursorVisible = false;
-            route = main.title;
-            longestMenu = active.LongestMenu();
-            longestElement = active.LongestElement();
-            elementsXOffset = 10 + longestMenu;
-            SetWindowSize();
-            eraser = new string(' ', Console.WindowWidth);
-        }
+        
 
-        private void SetWindowSize()
-        {
-            Console.WindowWidth = longestMenu + longestElement + extraWidth;
-            Console.BufferWidth = longestMenu + longestElement + extraWidth;
-            Console.WindowHeight = Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 2 + extraHeight;
-            Console.BufferHeight = Math.Max(active.subMenus.Count, active.elements.Count) * 3 + 2 + extraHeight;
-        }
+        
 
         public void WriteOne(string text)
         {
@@ -235,12 +246,12 @@ namespace ConsoleMenu
             Console.ResetColor();
 
             Console.SetCursorPosition(0, 1);
-            Console.Write($"{new string('─', longestMenu + 8)}┬{new string('─', longestElement + 6)}┬{new string('─', Console.WindowWidth - (longestMenu + 8 + longestElement + 8) - 1)}");
+            Console.Write($"{new string('─', maxMenuWidth + 8)}┬{new string('─', maxElementWidth + 6)}┬{new string('─', Console.WindowWidth - (maxMenuWidth + 8 + maxElementWidth + 8) - 1)}");
             for (int i = 2; i < Console.WindowHeight; i++) //Math.Max(subMenus.Count, elements.Count)* 3 + 2
             {
-                Console.SetCursorPosition(longestMenu + 8, i);
+                Console.SetCursorPosition(maxMenuWidth + 8, i);
                 Console.Write('│');
-                Console.SetCursorPosition(longestMenu + longestElement + 15, i);
+                Console.SetCursorPosition(maxMenuWidth + maxElementWidth + 15, i);
                 Console.Write('│');
             }
             //Console.SetCursorPosition(0, Math.Max(subMenus.Count, elements.Count) * 3 + 2);
@@ -354,19 +365,19 @@ namespace ConsoleMenu
         {
             if (selected)
             {
-                Console.Write($"   ╔{new string('═', longestMenu + 2)}╗\n");
-                Console.Write($" =>║ {new string(' ', (longestMenu - text.Length) / 2)}");
+                Console.Write($"   ╔{new string('═', maxMenuWidth + 2)}╗\n");
+                Console.Write($" =>║ {new string(' ', (maxMenuWidth - text.Length) / 2)}");
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write(text);
                 Console.ResetColor();
-                Console.Write($"{new string(' ', longestMenu % 2 == 0 ? text.Length % 2 == 0 ? (longestMenu - text.Length) / 2 : ((longestMenu - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((longestMenu - text.Length) / 2) + 1 : (longestMenu - text.Length) / 2)} ║\n");
-                Console.Write($"   ╚{new string('═', longestMenu + 2)}╝");
+                Console.Write($"{new string(' ', maxMenuWidth % 2 == 0 ? text.Length % 2 == 0 ? (maxMenuWidth - text.Length) / 2 : ((maxMenuWidth - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((maxMenuWidth - text.Length) / 2) + 1 : (maxMenuWidth - text.Length) / 2)} ║\n");
+                Console.Write($"   ╚{new string('═', maxMenuWidth + 2)}╝");
             }
             else
             {
-                Console.Write($"   ╔{new string('═', longestMenu + 2)}╗\n");
-                Console.Write($" - ║ {new string(' ', (longestMenu - text.Length) / 2)}{text}{new string(' ', longestMenu % 2 == 0 ? text.Length % 2 == 0 ? (longestMenu - text.Length) / 2 : ((longestMenu - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((longestMenu - text.Length) / 2) + 1 : (longestMenu - text.Length) / 2)} ║\n");
-                Console.Write($"   ╚{new string('═', longestMenu + 2)}╝");
+                Console.Write($"   ╔{new string('═', maxMenuWidth + 2)}╗\n");
+                Console.Write($" - ║ {new string(' ', (maxMenuWidth - text.Length) / 2)}{text}{new string(' ', maxMenuWidth % 2 == 0 ? text.Length % 2 == 0 ? (maxMenuWidth - text.Length) / 2 : ((maxMenuWidth - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((maxMenuWidth - text.Length) / 2) + 1 : (maxMenuWidth - text.Length) / 2)} ║\n");
+                Console.Write($"   ╚{new string('═', maxMenuWidth + 2)}╝");
             }
         }
 
@@ -375,31 +386,31 @@ namespace ConsoleMenu
             if (selected)
             {
                 Console.SetCursorPosition(xCursor, yCursor);
-                Console.Write($"╔{new string('═', longestElement + 2)}╗\n");
+                Console.Write($"╔{new string('═', maxElementWidth + 2)}╗\n");
                 Console.SetCursorPosition(xCursor, yCursor + 1);
-                Console.Write($"║ {new string(' ', (longestElement - text.Length) / 2)}");
+                Console.Write($"║ {new string(' ', (maxElementWidth - text.Length) / 2)}");
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.Write(text);
                 Console.ResetColor();
                 Console.Write($"{new string(' ',
-                    longestElement % 2 == 0 ?
+                    maxElementWidth % 2 == 0 ?
                     text.Length % 2 == 0 ?
-                      (longestElement - text.Length) / 2
-                    : ((longestElement - text.Length) / 2) + 1
+                      (maxElementWidth - text.Length) / 2
+                    : ((maxElementWidth - text.Length) / 2) + 1
                     : text.Length % 2 == 0 ?
-                      ((longestElement - text.Length) / 2) + 1
-                    : (longestElement - text.Length) / 2
+                      ((maxElementWidth - text.Length) / 2) + 1
+                    : (maxElementWidth - text.Length) / 2
                     )} ║\n");
                 Console.SetCursorPosition(xCursor, yCursor + 2);
-                Console.Write($"╚{new string('═', longestElement + 2)}╝");
+                Console.Write($"╚{new string('═', maxElementWidth + 2)}╝");
             }
             else
             {
-                Console.Write($"╔{new string('═', longestElement + 2)}╗\n");
+                Console.Write($"╔{new string('═', maxElementWidth + 2)}╗\n");
                 Console.SetCursorPosition(xCursor, yCursor + 1);
-                Console.Write($"║ {new string(' ', (longestElement - text.Length) / 2)}{text}{new string(' ', longestElement % 2 == 0 ? text.Length % 2 == 0 ? (longestElement - text.Length) / 2 : ((longestElement - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((longestElement - text.Length) / 2) + 1 : (longestElement - text.Length) / 2)} ║\n");
+                Console.Write($"║ {new string(' ', (maxElementWidth - text.Length) / 2)}{text}{new string(' ', maxElementWidth % 2 == 0 ? text.Length % 2 == 0 ? (maxElementWidth - text.Length) / 2 : ((maxElementWidth - text.Length) / 2) + 1 : text.Length % 2 == 0 ? ((maxElementWidth - text.Length) / 2) + 1 : (maxElementWidth - text.Length) / 2)} ║\n");
                 Console.SetCursorPosition(xCursor, yCursor + 2);
-                Console.Write($"╚{new string('═', longestElement + 2)}╝");
+                Console.Write($"╚{new string('═', maxElementWidth + 2)}╝");
             }
         }
 
@@ -423,3 +434,4 @@ namespace ConsoleMenu
             }
         }
     }
+}

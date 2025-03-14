@@ -11,60 +11,58 @@ namespace ConsoleMenu
         public Menu parent;
         public List<Element> subMenus = new List<Element>(10);
         public List<Element> elements = new List<Element>();
+        public int maxMenuWidth;
+        public int maxElementWidth;
 
         public Menu(Menu parent, string title) : base(title)
         {
             this.parent = parent;
             if (parent == null)
             {
-                subMenus.Add(new Back("Exit", true));
+                subMenus.Add(new Back("Exit", 3, 4, true));
             }
             else
             {
-                subMenus.Add(new Back("Back", false));
+                subMenus.Add(new Back("Back", 3, 4, false));
             }
         }
 
-        public int LongestMenu()
+        public Menu(string title) : base(title)
         {
-            int max = subMenus[0].title.Length;
-            for (int i = 1; i < subMenus.Count; i++)
+            parent = null;
+            subMenus.Add(new Back("Exit", 3, 4, true));
+        }
+
+        private void MaxMenuWidth()
+        {
+            if (subMenus.Count > 0)
             {
-                if (subMenus[i].title.Length > max)
+                int max = subMenus[0].width;
+                for (int i = 1; i < subMenus.Count; i++)
                 {
-                    max = subMenus[i].title.Length;
+                    if (subMenus[i].width > max)
+                    {
+                        max = subMenus[i].width;
+                    }
                 }
+                maxMenuWidth = max;
             }
-            return max;
         }
 
-        public int LongestElement()
+        private void MaxElementWidth()
         {
-            int max = 0;
             if (elements.Count > 0)
             {
-                max = elements[0].title.Length + 2;
+                int max = elements[0].width;
                 for (int i = 1; i < elements.Count; i++)
                 {
-                    switch (elements[i])
+                    if (elements[i].width > max)
                     {
-                        case InputField:
-                            if (((InputField)elements[i]).input.Length > max)
-                            {
-                                max = ((InputField)elements[i]).input.Length + 2;
-                            }
-                            break;
-                        case Button:
-                            if (elements[i].title.Length > max)
-                            {
-                                max = elements[i].title.Length+2; ;
-                            }
-                            break;
+                        max = elements[i].width;
                     }
-
                 }
+                maxElementWidth = max;
             }
-            return max;
         }
 
         public Menu AddMenu(string title, Action<Menu> next)
@@ -83,17 +81,24 @@ namespace ConsoleMenu
             subMenus.Remove(children);
         }
 
-        public Menu AddInput(string title, int id)
+        public Menu AddInput(string title, int id, int maxSize)
         {
-            elements.Add(new InputField(title, id));
+            elements.Add(new InputField(title, 3, 4, id, maxSize, this));
             return this;
         }
 
         public Menu AddButton(string title, Action<Menu> action)
         {
-            elements.Add(new Button(title, action));
+            elements.Add(new Button(title, 3, 4, action));
             return this;
         }
 
+        public override void CaclSize()
+        {
+            width = minWidth + title.Length;
+            height = minHeight;
+            MaxElementWidth();
+            MaxMenuWidth();
+        }
     }
 }

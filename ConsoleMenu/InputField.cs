@@ -8,19 +8,26 @@ namespace ConsoleMenu
 {
     public class InputField : Element
     {
-        Menu parent;
+        public Menu parent;
         public int id;
+        public string holder;
         public string input;
         public bool defaultt;
+        public int maxSize;
 
-        public InputField(string title, int id) : base(title)
+        public InputField(string title, int minHeight, int minWidth, int id, int maxSize, Menu parent) : base(title, minHeight, minWidth)
         {
-            input = "__________";
             this.id = id;
+            this.parent = parent;
+            this.maxSize = maxSize;
+            input = new string('_', maxSize);
             defaultt = true;
         }
 
-
-
+        public override void CaclSize()
+        {
+            width = minWidth + Math.Max(maxSize, title.Length);
+            height = minHeight;
+        }
     }
 }
